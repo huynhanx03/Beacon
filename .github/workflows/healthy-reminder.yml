@@ -1,0 +1,28 @@
+name: Healthy Reminder
+
+on:
+  schedule:
+    - cron: '17 * * * *'
+  workflow_dispatch:
+
+jobs:
+  remind:
+    runs-on: ubuntu-latest
+    timeout-minutes: 2
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-go@v5
+        with:
+          go-version: '1.25'
+          cache-dependency-path: beacon/go.sum
+
+      - name: Build
+        working-directory: beacon
+        run: go build -o ../beacon-bin ./cmd/beacon
+
+      - name: Run
+        env:
+          DISCORD_WEBHOOK_URL: ${{ secrets.BEACON_HEALTHY_WEBHOOK_URL }}
+          REMINDER_TYPE: healthy
+        run: ./beacon-bin
